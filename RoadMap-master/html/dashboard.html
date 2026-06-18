@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RoadMap - Dashboard Inteligente</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      .gradient-bg {
+        background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+      }
+      .card-hover {
+        transition: all 0.3s ease;
+      }
+      .card-hover:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      }
+      .roteiro-card {
+        background: linear-gradient(
+          135deg,
+          rgba(15, 118, 110, 0.05) 0%,
+          rgba(20, 184, 166, 0.05) 100%
+        );
+      }
+      .fade-in {
+        animation: fadeIn 0.3s ease-in;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      .tab-active {
+        border-bottom: 3px solid #0f766e;
+        color: #0f766e;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 min-h-screen">
+    <!-- HEADER -->
+    <header class="gradient-bg text-white shadow-lg">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center gap-3">
+            <i class="fa-solid fa-map text-3xl sm:text-4xl"></i>
+            <h1 class="text-2xl sm:text-3xl font-bold">RoadMap</h1>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="hidden sm:flex items-center gap-2">
+              <i class="fa-solid fa-user-circle text-2xl"></i>
+              <span id="user-name" class="text-sm font-medium"
+                >Carregando...</span
+              >
+            </div>
+            <button
+              onclick="logout()"
+              class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl transition flex items-center gap-2 text-sm sm:text-base"
+            >
+              <i class="fa-solid fa-right-from-bracket"></i>
+              <span class="hidden sm:inline">Sair</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <!-- SECTION TITLE AND ACTION BUTTON -->
+      <div
+        class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10"
+      >
+        <div>
+          <h2 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-2">
+            Meus Roteiros
+          </h2>
+          <p class="text-gray-600">
+            Gerencie ou gere novos roteiros inteligentes
+          </p>
+        </div>
+        <button
+          onclick="openNewRoteiroModal()"
+          class="gradient-bg hover:opacity-90 text-white px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 transition whitespace-nowrap w-full sm:w-auto justify-center sm:justify-start"
+        >
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Criar / Gerar Roteiro
+        </button>
+      </div>
+
+      <!-- EMPTY STATE -->
+      <div id="empty-state" class="text-center py-16 hidden">
+        <div class="mb-6">
+          <i class="fa-solid fa-map text-6xl text-gray-300"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-800 mb-2">
+          Nenhum roteiro criado
+        </h3>
+        <p class="text-gray-600 mb-6">
+          Comece a planejar sua viagem agora mesmo!
+        </p>
+        <button
+          onclick="openNewRoteiroModal()"
+          class="gradient-bg text-white px-6 py-3 rounded-2xl font-semibold inline-flex items-center gap-2 hover:opacity-90 transition"
+        >
+          <i class="fa-solid fa-plus"></i> Criar Meu Primeiro Roteiro
+        </button>
+      </div>
+
+      <!-- ROTEIROS GRID -->
+      <div
+        id="roteiros-container"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+      >
+        <!-- Roteiros serão inseridos aqui dinamicamente -->
+      </div>
+    </main>
+
+    <!-- MODAL: NOVO ROTEIRO (SMART & MANUAL) -->
+    <div
+      id="new-roteiro-modal"
+      class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4 py-8 overflow-y-auto"
+    >
+      <div class="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-lg fade-in">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-2xl font-bold text-gray-800">Novo Roteiro</h3>
+          <button
+            onclick="closeNewRoteiroModal()"
+            class="text-gray-500 hover:text-gray-700 text-2xl"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <!-- TABS -->
+        <div class="flex border-b mb-8">
+          <button
+            onclick="switchTab('smart')"
+            id="tab-smart"
+            class="flex-1 py-3 font-bold tab-active transition"
+          >
+            <i class="fa-solid fa-robot mr-2"></i>Geração Inteligente
+          </button>
+          <button
+            onclick="switchTab('manual')"
+            id="tab-manual"
+            class="flex-1 py-3 font-bold text-gray-400 hover:text-gray-600 transition"
+          >
+            <i class="fa-solid fa-pen mr-2"></i>Manual
+          </button>
+        </div>
+
+        <!-- SMART FORM -->
+        <form
+          id="form-smart"
+          onsubmit="generateSmartRoteiro(event)"
+          class="space-y-6"
+        >
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Continente</label
+              >
+              <select
+                id="smart-continente"
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:border-teal-500"
+              >
+                <option value="">Selecione...</option>
+                <option value="Europa">Europa</option>
+                <option value="América do Sul">América do Sul</option>
+                <option value="América do Norte">América do Norte</option>
+                <option value="Ásia">Ásia</option>
+                <option value="África">África</option>
+                <option value="Oceania">Oceania</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Estação do Ano</label
+              >
+              <select
+                id="smart-estacao"
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:border-teal-500"
+              >
+                <option value="">Selecione...</option>
+                <option value="Verão">Verão</option>
+                <option value="Inverno">Inverno</option>
+                <option value="Primavera">Primavera</option>
+                <option value="Outono">Outono</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Nome da Viagem (Opcional)</label
+            >
+            <input
+              id="smart-nome"
+              type="text"
+              placeholder="Ex: Minha Aventura Especial"
+              class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:border-teal-500"
+            />
+          </div>
+
+          <div class="bg-teal-50 p-4 rounded-2xl border border-teal-100">
+            <p class="text-sm text-teal-800 flex items-start gap-2">
+              <i class="fa-solid fa-circle-info mt-1"></i>
+              O RoadMap irá sugerir o melhor destino e atividades baseadas no
+              continente e clima escolhidos.
+            </p>
+          </div>
+
+          <button
+            type="submit"
+            id="btn-generate"
+            class="w-full gradient-bg text-white py-4 rounded-2xl font-bold text-lg hover:opacity-90 transition shadow-lg flex items-center justify-center gap-2"
+          >
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Gerar Roteiro
+            Personalizado
+          </button>
+        </form>
+
+        <!-- MANUAL FORM -->
+        <form
+          id="form-manual"
+          onsubmit="createManualRoteiro(event)"
+          class="space-y-6 hidden"
+        >
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Título do Roteiro</label
+            >
+            <input
+              id="man-titulo"
+              type="text"
+              placeholder="Ex: Viagem para a Europa"
+              required
+              class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:border-teal-500"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Destino</label
+            >
+            <input
+              id="man-destino"
+              type="text"
+              placeholder="Ex: Paris, França"
+              required
+              class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:border-teal-500"
+            />
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Data Início</label
+              >
+              <input
+                id="man-inicio"
+                type="date"
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:border-teal-500"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Data Fim</label
+              >
+              <input
+                id="man-fim"
+                type="date"
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:border-teal-500"
+              />
+            </div>
+          </div>
+          <button
+            type="submit"
+            class="w-full gradient-bg text-white py-4 rounded-2xl font-bold text-lg hover:opacity-90 transition shadow-lg"
+          >
+            Criar Manualmente
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- LOADING OVERLAY -->
+    <div
+      id="loading-overlay"
+      class="hidden fixed inset-0 bg-black/80 flex flex-col items-center justify-center z-[100] text-white"
+    >
+      <div
+        class="w-20 h-20 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mb-6"
+      ></div>
+      <h3 class="text-2xl font-bold mb-2">Gerando seu roteiro...</h3>
+      <p class="text-teal-400 animate-pulse" id="loading-text">
+        Analisando destinos no continente...
+      </p>
+    </div>
+
+    <!-- MODAL: CONFIRMAR EXCLUSÃO -->
+    <div
+      id="delete-confirmation-modal"
+      class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4"
+    >
+      <div class="bg-white rounded-3xl p-8 w-full max-w-sm fade-in text-center">
+        <div
+          class="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-6"
+        >
+          <i class="fa-solid fa-trash-can"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-800 mb-2">Excluir Roteiro?</h3>
+        <p class="text-gray-600 mb-8">Esta ação não pode ser desfeita.</p>
+        <div class="flex gap-4">
+          <button
+            onclick="confirmDelete()"
+            class="flex-1 bg-red-600 text-white py-3 rounded-2xl font-bold hover:bg-red-700 transition"
+          >
+            Excluir
+          </button>
+          <button
+            onclick="closeDeleteModal()"
+            class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-2xl font-bold hover:bg-gray-200 transition"
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // ==================== DADOS E ESTADO ====================
+      let roteiros = [];
+      let usuarioLogado = null;
+      let roteiroParaExcluir = null;
+
+      const SUGESTOES = {
+        Europa: {
+          Verão: {
+            destino: "Ilhas Gregas, Grécia",
+            desc: "Aproveite o sol do Mediterrâneo, praias de águas cristalinas e a gastronomia local única.",
+          },
+          Inverno: {
+            destino: "Alpes Suíços, Suíça",
+            desc: "Esqui, vilas aconchegantes e paisagens nevadas deslumbrantes no coração da Europa.",
+          },
+          Primavera: {
+            destino: "Amsterdã, Holanda",
+            desc: "Veja os campos de tulipas florescendo e aproveite passeios de bicicleta pelos canais.",
+          },
+          Outono: {
+            destino: "Toscana, Itália",
+            desc: "A época da colheita das uvas, vinhos excelentes e colinas douradas.",
+          },
+        },
+        "América do Sul": {
+          Verão: {
+            destino: "Rio de Janeiro, Brasil",
+            desc: "Carnaval, praias icônicas e muita energia sob o sol tropical.",
+          },
+          Inverno: {
+            destino: "Bariloche, Argentina",
+            desc: "Neve na América do Sul, chocolate quente e esportes de inverno.",
+          },
+          Primavera: {
+            destino: "Machu Picchu, Peru",
+            desc: "Clima perfeito para trilhas e visibilidade clara da cidade perdida dos Incas.",
+          },
+          Outono: {
+            destino: "Deserto do Atacama, Chile",
+            desc: "Céus mais limpos do mundo para observação de estrelas e cores incríveis.",
+          },
+        },
+        Ásia: {
+          Verão: {
+            destino: "Bali, Indonésia",
+            desc: "Surfe, templos espirituais e campos de arroz verdejantes.",
+          },
+          Inverno: {
+            destino: "Tóquio, Japão",
+            desc: "Iluminações de inverno incríveis, onsens quentes e festivais de neve.",
+          },
+          Primavera: {
+            destino: "Quioto, Japão",
+            desc: "O espetáculo das cerejeiras (Sakura) em flor por toda a cidade.",
+          },
+          Outono: {
+            destino: "Seul, Coreia do Sul",
+            desc: "Parques tingidos de vermelho e laranja, clima fresco e festivais culturais.",
+          },
+        },
+      };
+
+      // ==================== INICIALIZAÇÃO ====================
+      window.addEventListener("DOMContentLoaded", () => {
+        const userJSON = localStorage.getItem("roadmap_usuario_logado");
+        if (!userJSON) {
+          window.location.href = "login.html";
+          return;
+        }
+        usuarioLogado = JSON.parse(userJSON);
+        document.getElementById("user-name").textContent = usuarioLogado.nome;
+
+        const roteirosJSON = localStorage.getItem("roadmap_roteiros");
+        roteiros = roteirosJSON ? JSON.parse(roteirosJSON) : [];
+        atualizarUI();
+      });
+
+      // ==================== NAVEGAÇÃO E UI ====================
+      function switchTab(type) {
+        const tabSmart = document.getElementById("tab-smart");
+        const tabManual = document.getElementById("tab-manual");
+        const formSmart = document.getElementById("form-smart");
+        const formManual = document.getElementById("form-manual");
+
+        if (type === "smart") {
+          tabSmart.classList.add("tab-active");
+          tabSmart.classList.remove("text-gray-400");
+          tabManual.classList.remove("tab-active");
+          tabManual.classList.add("text-gray-400");
+          formSmart.classList.remove("hidden");
+          formManual.classList.add("hidden");
+        } else {
+          tabManual.classList.add("tab-active");
+          tabManual.classList.remove("text-gray-400");
+          tabSmart.classList.remove("tab-active");
+          tabSmart.classList.add("text-gray-400");
+          formManual.classList.remove("hidden");
+          formSmart.classList.add("hidden");
+        }
+      }
+
+      function openNewRoteiroModal() {
+        document.getElementById("new-roteiro-modal").classList.remove("hidden");
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeNewRoteiroModal() {
+        document.getElementById("new-roteiro-modal").classList.add("hidden");
+        document.body.style.overflow = "auto";
+      }
+
+      function logout() {
+        localStorage.removeItem("roadmap_usuario_logado");
+        window.location.href = "login.html";
+      }
+
+      // ==================== LÓGICA DE GERAÇÃO ====================
+      function generateSmartRoteiro(event) {
+        event.preventDefault();
+        const continente = document.getElementById("smart-continente").value;
+        const estacao = document.getElementById("smart-estacao").value;
+        const nomeCustom = document.getElementById("smart-nome").value.trim();
+
+        document.getElementById("loading-overlay").classList.remove("hidden");
+
+        const loadingTexts = [
+          "Analisando destinos no continente...",
+          "Verificando condições climáticas...",
+          "Selecionando as melhores atividades...",
+          "Finalizando seu roteiro personalizado...",
+        ];
+
+        let i = 0;
+        const interval = setInterval(() => {
+          if (i < loadingTexts.length) {
+            document.getElementById("loading-text").textContent =
+              loadingTexts[i];
+            i++;
+          }
+        }, 800);
+
+        setTimeout(() => {
+          clearInterval(interval);
+
+          // Busca sugestão (ou usa fallback se não houver no mapa)
+          const sugestao = (SUGESTOES[continente] &&
+            SUGESTOES[continente][estacao]) || {
+            destino: `${continente} - Diversos`,
+            desc: `Um roteiro incrível preparado para aproveitar o melhor do ${estacao} em ${continente}.`,
+          };
+
+          const novoRoteiro = {
+            id: Date.now(),
+            titulo: nomeCustom || `Aventura em ${continente} (${estacao})`,
+            destino: sugestao.destino,
+            descricao: sugestao.desc,
+            dataInicio: new Date().toISOString().split("T")[0],
+            dataFim: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+              .toISOString()
+              .split("T")[0],
+            tipo: "smart",
+            continente,
+            estacao,
+          };
+
+          roteiros.push(novoRoteiro);
+          localStorage.setItem("roadmap_roteiros", JSON.stringify(roteiros));
+
+          document.getElementById("loading-overlay").classList.add("hidden");
+          closeNewRoteiroModal();
+          atualizarUI();
+        }, 3500);
+      }
+
+      function createManualRoteiro(event) {
+        event.preventDefault();
+        const novoRoteiro = {
+          id: Date.now(),
+          titulo: document.getElementById("man-titulo").value,
+          destino: document.getElementById("man-destino").value,
+          dataInicio: document.getElementById("man-inicio").value,
+          dataFim: document.getElementById("man-fim").value,
+          descricao: "Roteiro criado manualmente.",
+          tipo: "manual",
+        };
+        roteiros.push(novoRoteiro);
+        localStorage.setItem("roadmap_roteiros", JSON.stringify(roteiros));
+        closeNewRoteiroModal();
+        atualizarUI();
+      }
+
+      function atualizarUI() {
+        const container = document.getElementById("roteiros-container");
+        const emptyState = document.getElementById("empty-state");
+
+        if (roteiros.length === 0) {
+          container.innerHTML = "";
+          emptyState.classList.remove("hidden");
+        } else {
+          emptyState.classList.add("hidden");
+          container.innerHTML = roteiros
+            .map(
+              (r) => `
+          <div onclick="window.location.href='roteiro.html?id=${r.id}'" class="roteiro-card rounded-3xl p-6 border border-teal-100 card-hover fade-in relative overflow-hidden cursor-pointer">
+            ${r.tipo === "smart" ? '<div class="absolute top-0 right-0 bg-teal-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl"><i class="fa-solid fa-robot mr-1"></i>SMART</div>' : ""}
+            
+            <div class="flex justify-between items-start mb-4">
+              <div class="flex-1 pr-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-1">${r.titulo}</h3>
+                <p class="text-sm text-gray-600 flex items-center gap-2">
+                  <i class="fa-solid fa-location-dot text-teal-600"></i>
+                  ${r.destino}
+                </p>
+              </div>
+              <button onclick="event.stopPropagation(); openDeleteModal(${r.id})" class="text-red-400 hover:text-red-600 transition">
+                <i class="fa-solid fa-trash-alt"></i>
+              </button>
+            </div>
+
+            <p class="text-gray-600 text-sm mb-6 line-clamp-3">${r.descricao}</p>
+
+            <div class="flex items-center justify-between text-xs font-medium text-gray-500 bg-white/50 p-3 rounded-2xl">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-calendar-day text-teal-600"></i>
+                ${formatarData(r.dataInicio)}
+              </div>
+              <i class="fa-solid fa-arrow-right text-gray-300"></i>
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-calendar-check text-teal-600"></i>
+                ${formatarData(r.dataFim)}
+              </div>
+            </div>
+          </div>
+        `,
+            )
+            .join("");
+        }
+      }
+
+      function formatarData(d) {
+        return new Date(d).toLocaleDateString("pt-BR");
+      }
+
+      function openDeleteModal(id) {
+        roteiroParaExcluir = id;
+        document
+          .getElementById("delete-confirmation-modal")
+          .classList.remove("hidden");
+      }
+
+      function closeDeleteModal() {
+        document
+          .getElementById("delete-confirmation-modal")
+          .classList.add("hidden");
+      }
+
+      function confirmDelete() {
+        roteiros = roteiros.filter((r) => r.id !== roteiroParaExcluir);
+        localStorage.setItem("roadmap_roteiros", JSON.stringify(roteiros));
+        closeDeleteModal();
+        atualizarUI();
+      }
+    </script>
+  </body>
+</html>
