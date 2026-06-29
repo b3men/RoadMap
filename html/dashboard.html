@@ -42,41 +42,46 @@
     <div class="bg-white rounded-3xl p-8 w-full max-w-lg">
       <h3 class="text-2xl font-bold mb-6">Criar Novo Roteiro</h3>
 
+      <!-- Tabs -->
       <div class="flex border-b mb-6">
-        <button onclick="switchTab('smart')" id="tab-smart" class="flex-1 pb-3 font-medium border-b-2 border-teal-600">Inteligente (IA)</button>
-        <button onclick="switchTab('manual')" id="tab-manual" class="flex-1 pb-3 font-medium text-gray-400">Manual</button>
+        <button onclick="switchTab('smart')" id="tab-smart" 
+                class="flex-1 py-3 font-medium border-b-2 border-teal-600 text-teal-600 transition">
+          Inteligente (IA)
+        </button>
+        <button onclick="switchTab('manual')" id="tab-manual" 
+                class="flex-1 py-3 font-medium text-gray-500 hover:text-gray-700 transition">
+          Manual
+        </button>
       </div>
 
-      <!-- Smart Form -->
-      <form id="form-smart" onsubmit="gerarRoteiroIA(event)">
-        <div class="space-y-5">
-          <div>
-            <label class="block text-sm mb-2">Continente</label>
-            <select id="smart-continente" required class="w-full p-3 border rounded-2xl">
-              <option value="">Selecione...</option>
-              <option value="Europa">Europa</option>
-              <option value="América do Sul">América do Sul</option>
-              <option value="Ásia">Ásia</option>
-              <option value="América do Norte">América do Norte</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm mb-2">Estação</label>
-            <select id="smart-estacao" required class="w-full p-3 border rounded-2xl">
-              <option value="">Selecione...</option>
-              <option value="Verão">Verão</option>
-              <option value="Inverno">Inverno</option>
-              <option value="Primavera">Primavera</option>
-              <option value="Outono">Outono</option>
-            </select>
-          </div>
-          <button type="submit" class="w-full gradient-bg text-white py-4 rounded-2xl font-bold">Gerar com IA</button>
+      <!-- Form Inteligente -->
+      <form id="form-smart" onsubmit="gerarRoteiroIA(event)" class="space-y-5">
+        <div>
+          <label class="block text-sm mb-2">Continente</label>
+          <select id="smart-continente" required class="w-full p-3 border rounded-2xl">
+            <option value="">Selecione...</option>
+            <option value="Europa">Europa</option>
+            <option value="América do Sul">América do Sul</option>
+            <option value="Ásia">Ásia</option>
+            <option value="América do Norte">América do Norte</option>
+          </select>
         </div>
+        <div>
+          <label class="block text-sm mb-2">Estação</label>
+          <select id="smart-estacao" required class="w-full p-3 border rounded-2xl">
+            <option value="">Selecione...</option>
+            <option value="Verão">Verão</option>
+            <option value="Inverno">Inverno</option>
+            <option value="Primavera">Primavera</option>
+            <option value="Outono">Outono</option>
+          </select>
+        </div>
+        <button type="submit" class="w-full gradient-bg text-white py-4 rounded-2xl font-bold">Gerar com IA</button>
       </form>
 
-      <!-- Manual Form -->
+      <!-- Form Manual -->
       <form id="form-manual" onsubmit="criarManual(event)" class="hidden space-y-5">
-        <input id="man-titulo" placeholder="Título" required class="w-full p-3 border rounded-2xl">
+        <input id="man-titulo" placeholder="Título do Roteiro" required class="w-full p-3 border rounded-2xl">
         <input id="man-destino" placeholder="Destino" required class="w-full p-3 border rounded-2xl">
         <div class="grid grid-cols-2 gap-4">
           <input id="man-inicio" type="date" required class="w-full p-3 border rounded-2xl">
@@ -88,7 +93,7 @@
   </div>
 
   <script>
-    let roteiros = JSON.parse(localStorage.getItem("roadmap_roteiros") || "[]");
+    let roteiros = JSON.parse(localStorage.getItem("roadmap_roteiros")) || [];
 
     function salvarRoteiros() {
       localStorage.setItem("roadmap_roteiros", JSON.stringify(roteiros));
@@ -98,45 +103,42 @@
       const container = document.getElementById("roteiros-container");
       container.innerHTML = roteiros.map(r => `
         <div onclick="verRoteiro(${r.id})" class="bg-white rounded-3xl p-6 border hover:border-teal-300 cursor-pointer">
-          <h3 class="font-bold">${r.titulo}</h3>
-          <p class="text-teal-600">${r.destino}</p>
-          <p class="text-sm text-gray-500 mt-2">${r.dataInicio} — ${r.dataFim}</p>
+          <h3 class="font-bold text-xl">${r.titulo}</h3>
+          <p class="text-teal-600 mt-1">${r.destino}</p>
+          <p class="text-sm text-gray-500 mt-4">${r.dataInicio} — ${r.dataFim}</p>
         </div>
       `).join('');
     }
 
     function openNewRoteiroModal() {
       document.getElementById("new-roteiro-modal").classList.remove("hidden");
+      switchTab('smart'); // Garante que inicia na aba Inteligente
     }
 
     function switchTab(tab) {
-      document.getElementById("form-smart").classList.toggle("hidden", tab !== "smart");
-      document.getElementById("form-manual").classList.toggle("hidden", tab !== "manual");
+      const tabSmart = document.getElementById("tab-smart");
+      const tabManual = document.getElementById("tab-manual");
+      const formSmart = document.getElementById("form-smart");
+      const formManual = document.getElementById("form-manual");
+
+      if (tab === "smart") {
+        tabSmart.classList.add("border-b-2", "border-teal-600", "text-teal-600");
+        tabManual.classList.remove("border-b-2", "border-teal-600", "text-teal-600");
+        formSmart.classList.remove("hidden");
+        formManual.classList.add("hidden");
+      } else {
+        tabManual.classList.add("border-b-2", "border-teal-600", "text-teal-600");
+        tabSmart.classList.remove("border-b-2", "border-teal-600", "text-teal-600");
+        formManual.classList.remove("hidden");
+        formSmart.classList.add("hidden");
+      }
     }
 
-    async function gerarRoteiroIA(e) {
+    // Funções de criação (simplificadas por enquanto)
+    function gerarRoteiroIA(e) {
       e.preventDefault();
-      const continente = document.getElementById("smart-continente").value;
-      const estacao = document.getElementById("smart-estacao").value;
-
-      // Aqui você pode chamar a IA (Gemini) para gerar o roteiro
-      const novo = {
-        id: Date.now(),
-        titulo: `Viagem para ${continente}`,
-        destino: `${continente} - Sugerido pela IA`,
-        dataInicio: "2026-06-01",
-        dataFim: "2026-06-10",
-        tipo: "smart",
-        continente: continente,
-        estacao: estacao,
-        descricao: `Roteiro gerado para ${estacao} em ${continente}`
-      };
-
-      roteiros.push(novo);
-      salvarRoteiros();
-      renderDashboard();
-      document.getElementById("new-roteiro-modal").classList.add("hidden");
-      alert("Roteiro gerado com sucesso!");
+      alert("Funcionalidade IA em desenvolvimento");
+      // Aqui você pode colocar a chamada real à Gemini
     }
 
     function criarManual(e) {
@@ -160,7 +162,8 @@
     }
 
     function logout() {
-      window.location.href = "login.html";
+      localStorage.removeItem("roadmap_usuario_logado");
+      window.location.href = "index.html";
     }
 
     // Inicializar
