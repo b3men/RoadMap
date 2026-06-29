@@ -1,23 +1,113 @@
+// ====================== DADOS GLOBAIS ======================
 let roteiros = JSON.parse(localStorage.getItem('roadmap_roteiros')) || [];
 
+// ====================== INICIALIZAÇÃO ======================
 function init() {
   if (roteiros.length === 0) {
-    roteiros = [{
-      id: 1,
-      titulo: "Europa Central & Alpes Suíços",
-      destino: "Budapeste → Viena → Praga → St. Moritz → Milão",
-      dataInicio: "2026-05-02",
-      dataFim: "2026-05-16",
-      tipo: "smart",
-      continente: "Europa",
-      estacao: "Primavera",
-      descricao: "Viagem incrível pela Europa Central gerada por IA",
-      atividades: ["Chegada em Budapeste", "Passeio pelo Danúbio", "Bernina Express"]
-    }];
+    roteiros = [
+      {
+        id: 1,
+        titulo: "Europa Central & Alpes",
+        destino: "Budapeste → Viena → Praga → St. Moritz",
+        dataInicio: "2026-05-02",
+        dataFim: "2026-05-16",
+        tipo: "manual",
+        continente: "Europa",
+        estacao: "Primavera",
+        descricao: "Viagem cultural e natureza pela Europa Central",
+        atividades: ["Chegada em Budapeste", "Passeio pelo Danúbio", "Bernina Express"]
+      },
+      {
+        id: 2,
+        titulo: "Praias do Nordeste Brasileiro",
+        destino: "Fortaleza → Jericoacoara → Lençóis Maranhenses",
+        dataInicio: "2026-01-10",
+        dataFim: "2026-01-20",
+        tipo: "manual",
+        continente: "América do Sul",
+        estacao: "Verão",
+        descricao: "Sol, mar e dunas incríveis",
+        atividades: ["Praia de Jeri", "Dunas de Lençóis", "Passeio de buggy"]
+      },
+      {
+        id: 3,
+        titulo: "Japão das Cerejeiras",
+        destino: "Tóquio → Quioto → Osaka",
+        dataInicio: "2026-03-25",
+        dataFim: "2026-04-05",
+        tipo: "manual",
+        continente: "Ásia",
+        estacao: "Primavera",
+        descricao: "Sakura e cultura japonesa",
+        atividades: ["Templos de Quioto", "Hanami em Tóquio", "Castelo de Osaka"]
+      },
+      {
+        id: 4,
+        titulo: "Patagônia Argentina & Chile",
+        destino: "Bariloche → Ushuaia → Torres del Paine",
+        dataInicio: "2026-07-15",
+        dataFim: "2026-07-28",
+        tipo: "manual",
+        continente: "América do Sul",
+        estacao: "Inverno",
+        descricao: "Neve, montanhas e paisagens épicas",
+        atividades: ["Esqui em Bariloche", "Glaciar Perito Moreno", "Trekking em Torres del Paine"]
+      },
+      {
+        id: 5,
+        titulo: "Safári no Quênia",
+        destino: "Nairobi → Maasai Mara → Lago Nakuru",
+        dataInicio: "2026-09-05",
+        dataFim: "2026-09-15",
+        tipo: "manual",
+        continente: "África",
+        estacao: "Primavera",
+        descricao: "Aventura selvagem na África",
+        atividades: ["Safari no Maasai Mara", "Flamingos no Lago Nakuru", "Reserva de Elefantes"]
+      },
+      {
+        id: 6,
+        titulo: "Austrália - Costa Leste",
+        destino: "Sydney → Great Barrier Reef → Cairns",
+        dataInicio: "2026-11-01",
+        dataFim: "2026-11-12",
+        tipo: "manual",
+        continente: "Oceania",
+        estacao: "Primavera",
+        descricao: "Praias, recifes e cidades vibrantes",
+        atividades: ["Opera House em Sydney", "Mergulho na Grande Barreira", "Floresta Tropical"]
+      },
+      {
+        id: 7,
+        titulo: "Canadá - Montanhas Rochosas",
+        destino: "Vancouver → Banff → Lake Louise",
+        dataInicio: "2026-10-10",
+        dataFim: "2026-10-20",
+        tipo: "manual",
+        continente: "América do Norte",
+        estacao: "Outono",
+        descricao: "Outono dourado nas montanhas",
+        atividades: ["Lake Louise", "Banff National Park", "Gelo no Columbia Icefield"]
+      },
+      {
+        id: 8,
+        titulo: "Marrocos - Deserto e Medina",
+        destino: "Marrakech → Deserto do Saara → Fez",
+        dataInicio: "2026-04-05",
+        dataFim: "2026-04-15",
+        tipo: "manual",
+        continente: "África",
+        estacao: "Primavera",
+        descricao: "Cultura árabe e deserto",
+        atividades: ["Praça Jemaa el-Fna", "Passeio de camelo no Saara", "Medina de Fez"]
+      }
+    ];
+
     localStorage.setItem('roadmap_roteiros', JSON.stringify(roteiros));
   }
 }
 
+// ====================== DASHBOARD ======================
 function renderRoteiros() {
   const container = document.getElementById('roteiros-list') || document.getElementById('roteiros-container');
   if (!container) return;
@@ -30,84 +120,11 @@ function renderRoteiros() {
       </div>
       <p class="text-teal-600 mt-2">${roteiro.destino}</p>
       <p class="text-sm text-gray-500 mt-4">${roteiro.dataInicio} até ${roteiro.dataFim}</p>
-      
-      <div class="mt-6 pt-6 border-t">
-        <button onclick="event.stopImmediatePropagation(); verRoteiro(${roteiro.id});" 
-                class="w-full bg-teal-600 text-white py-3 rounded-2xl text-sm font-medium">
-          Ver Detalhes
-        </button>
-      </div>
     </div>
   `).join('');
 }
 
-async function gerarRoteiroIA(e) {
-  e.preventDefault();
-
-  const continente = document.getElementById('smart-continente').value;
-  const estacao = document.getElementById('smart-estacao').value;
-  const nomeCustom = document.getElementById('smart-nome') ? document.getElementById('smart-nome').value.trim() : '';
-
-  if (!continente || !estacao) {
-    alert("Por favor, selecione Continente e Estação.");
-    return;
-  }
-
-  const btn = e.target.querySelector('button');
-  btn.disabled = true;
-  btn.innerHTML = 'Gerando com IA...';
-
-  try {
-    const prompt = `Crie um roteiro de viagem para ${continente} na estação de ${estacao}.
-                    ${nomeCustom ? `Título: ${nomeCustom}` : ''}
-                    Responda apenas com um JSON válido contendo: titulo, destino, descricao, dataInicio, dataFim.`;
-
-    const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + process.env.SUA_CHAVE_AQUI,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }]
-        })
-      }
-    );
-
-    const data = await response.json();
-    const texto = data.candidates[0].content.parts[0].text;
-
-    const jsonMatch = texto.match(/\{[\s\S]*\}/);
-    const gerado = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
-
-    const novoRoteiro = {
-      id: Date.now(),
-      titulo: gerado?.titulo || nomeCustom || `Viagem para ${continente}`,
-      destino: gerado?.destino || `${continente}`,
-      descricao: gerado?.descricao || `Roteiro gerado para ${estacao} em ${continente}`,
-      dataInicio: gerado?.dataInicio || "2026-06-01",
-      dataFim: gerado?.dataFim || "2026-06-10",
-      tipo: "smart",
-      continente: continente,
-      estacao: estacao,
-      atividades: []
-    };
-
-    roteiros.push(novoRoteiro);
-    localStorage.setItem('roadmap_roteiros', JSON.stringify(roteiros));
-
-    alert("✅ Roteiro gerado com sucesso!");
-    document.getElementById('new-roteiro-modal').classList.add('hidden');
-    renderRoteiros();
-
-  } catch (error) {
-    console.error(error);
-    alert("❌ Erro ao conectar com a IA. Verifique sua chave do Gemini.");
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Gerar Roteiro com IA';
-  }
-}
-
+// ====================== CRIAR MANUAL ======================
 function criarRoteiroManual(e) {
   e.preventDefault();
 
@@ -125,17 +142,18 @@ function criarRoteiroManual(e) {
   localStorage.setItem('roadmap_roteiros', JSON.stringify(roteiros));
   renderRoteiros();
   document.getElementById('new-roteiro-modal').classList.add('hidden');
+  alert("Roteiro criado com sucesso!");
 }
 
+// ====================== NAVEGAÇÃO ======================
 function verRoteiro(id) {
   localStorage.setItem('roteiroAtual', id);
   window.location.href = 'roteiro.html';
 }
 
+// ====================== INICIALIZAÇÃO ======================
 init();
 
-if (window.location.pathname.includes('dashboard.html')) {
+if (window.location.pathname.includes('dashboard.html') || window.location.pathname.includes('index.html')) {
   renderRoteiros();
-} else if (window.location.pathname.includes('roteiro.html')) {
-  carregarRoteiroAtual();
 }

@@ -51,18 +51,18 @@
       <!-- Ações -->
       <div class="bg-white p-8 sm:p-12 border-x border-gray-100">
         <div class="flex gap-4 mb-8">
-          <button onclick="gerarConteudoIA()" 
-                  class="flex-1 bg-teal-600 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-teal-700">
-            <i class="fa-solid fa-wand-magic-sparkles"></i> Gerar com IA
+          <button onclick="mostrarChecklist()" 
+                  class="flex-1 bg-amber-500 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-amber-600">
+            <i class="fa-solid fa-suitcase"></i> Checklist de Mala
           </button>
           <button onclick="adicionarAtividade()" 
-                  class="flex-1 bg-white border border-teal-600 text-teal-600 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-teal-50">
-            <i class="fa-solid fa-plus"></i> Adicionar Atividade Manual
+                  class="flex-1 bg-teal-600 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-teal-700">
+            <i class="fa-solid fa-plus"></i> Nova Atividade
           </button>
         </div>
 
         <h3 class="text-xl font-bold mb-6">Atividades do Roteiro</h3>
-        <div id="lista-atividades" class="space-y-4 min-h-[200px]"></div>
+        <div id="lista-atividades" class="space-y-4"></div>
       </div>
     </div>
 
@@ -107,84 +107,52 @@
         : `<span class="bg-gray-200 text-gray-700 px-4 py-1.5 rounded-full text-xs font-bold">Manual</span>`;
     }
 
-    // ==================== IA ====================
-    async function gerarRoteiroIA(e) {
-      e.preventDefault();
+    // ==================== CHECKLIST DE MALA ====================
+    function mostrarChecklist() {
+      let checklistHTML = `<h4 class="font-bold text-lg mb-4">Checklist de Bagagem</h4>`;
 
-      const continente = document.getElementById('smart-continente').value;
-      const estacao = document.getElementById('smart-estacao').value;
-      const nomeCustom = document.getElementById('smart-nome') ? document.getElementById('smart-nome').value.trim() : '';
-
-      if (!continente || !estacao) {
-        alert("Por favor, selecione Continente e Estação.");
-        return;
+      if (roteiroAtual.estacao === "Verão") {
+        checklistHTML += `
+          <ul class="space-y-3 text-gray-700">
+            <li>✅ Roupas leves e shorts</li>
+            <li>✅ Protetor solar e óculos de sol</li>
+            <li>✅ Chinelo / Sandália</li>
+            <li>✅ Roupa de banho</li>
+            <li>✅ Garrafa de água reutilizável</li>
+          </ul>`;
+      } else if (roteiroAtual.estacao === "Inverno") {
+        checklistHTML += `
+          <ul class="space-y-3 text-gray-700">
+            <li>✅ Casaco pesado / Jaqueta</li>
+            <li>✅ Botas ou tênis impermeável</li>
+            <li>✅ Luvas, cachecol e gorro</li>
+            <li>✅ Roupas térmicas</li>
+            <li>✅ Medicamentos para frio</li>
+          </ul>`;
+      } else {
+        checklistHTML += `
+          <ul class="space-y-3 text-gray-700">
+            <li>✅ Roupas versáteis (camadas)</li>
+            <li>✅ Jaqueta leve impermeável</li>
+            <li>✅ Tênis confortável</li>
+            <li>✅ Adaptador de tomada</li>
+            <li>✅ Documentos e passaporte</li>
+          </ul>`;
       }
 
-      const btn = e.target.querySelector('button');
-      btn.disabled = true;
-      btn.innerHTML = 'Gerando com IA...';
-
-      try {
-        const prompt = `Crie um roteiro de viagem para ${continente} na estação de ${estacao}.
-                        ${nomeCustom ? `Título: ${nomeCustom}` : ''}
-                        Responda apenas com um JSON válido contendo: titulo, destino, descricao, dataInicio, dataFim.`;
-
-        const response = await fetch(
-          "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + process.env.SUA_CHAVE_AQUI,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }]
-            })
-          }
-        );
-
-        const data = await response.json();
-        const texto = data.candidates[0].content.parts[0].text;
-
-        const jsonMatch = texto.match(/\{[\s\S]*\}/);
-        const gerado = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
-
-        const novoRoteiro = {
-          id: Date.now(),
-          titulo: gerado?.titulo || nomeCustom || `Viagem para ${continente}`,
-          destino: gerado?.destino || `${continente}`,
-          descricao: gerado?.descricao || `Roteiro gerado para ${estacao} em ${continente}`,
-          dataInicio: gerado?.dataInicio || "2026-06-01",
-          dataFim: gerado?.dataFim || "2026-06-10",
-          tipo: "smart",
-          continente: continente,
-          estacao: estacao,
-          atividades: []
-        };
-
-        roteiros.push(novoRoteiro);
-        localStorage.setItem('roadmap_roteiros', JSON.stringify(roteiros));
-
-        alert("✅ Roteiro gerado com sucesso!");
-        document.getElementById('new-roteiro-modal').classList.add('hidden');
-        renderRoteiros();
-
-      } catch (error) {
-        console.error(error);
-        alert("❌ Erro ao conectar com a IA. Verifique sua chave do Gemini.");
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Gerar Roteiro com IA';
-      }
+      document.getElementById("lista-atividades").innerHTML = checklistHTML;
     }
-    // ==================== MANUAL ====================
 
+    // ==================== ATIVIDADES MANUAL ====================
     function adicionarAtividade() {
-      e.preventDefault();
-      const novaAtividade = {
-        titulo: document.getElementById("atividade-titulo").value,
-        destino: document.getElementById("man-destino").value,
-        dataInicio: document.getElementById("man-inicio").value,
-        dataFim: document.getElementById("man-fim").value
-      };
-      atividades.push(novaAtividade);
+      const data = prompt("Data (ex: 2026-06-05):");
+      if (!data) return;
+      const hora = prompt("Hora (ex: 14:30):");
+      if (!hora) return;
+      const local = prompt("Descrição / Local:");
+      if (!local) return;
+
+      atividades.push({ data, hora, local });
       salvarAlteracoes();
       renderAtividades();
     }
@@ -192,17 +160,16 @@
     function renderAtividades() {
       const container = document.getElementById("lista-atividades");
       if (atividades.length === 0) {
-        container.innerHTML = `<p class="text-gray-500 text-center py-8">Nenhuma atividade adicionada ainda.</p>`;
+        container.innerHTML = `<p class="text-gray-500 py-8 text-center">Nenhuma atividade adicionada.</p>`;
         return;
       }
-
-      container.innerHTML = atividades.map((at, index) => `
-        <div class="bg-gray-50 p-5 rounded-3xl border flex justify-between items-center">
+      container.innerHTML = atividades.map((at, i) => `
+        <div class="bg-gray-50 p-5 rounded-3xl border flex justify-between">
           <div>
-            <p class="font-medium">${at.descricao}</p>
+            <p class="font-medium">${at.local}</p>
             <p class="text-sm text-teal-600">${at.data} • ${at.hora}</p>
           </div>
-          <button onclick="removerAtividade(${index})" class="text-red-500 hover:text-red-700 p-2">
+          <button onclick="removerAtividade(${i})" class="text-red-500">
             <i class="fa-solid fa-trash"></i>
           </button>
         </div>
@@ -210,7 +177,7 @@
     }
 
     function removerAtividade(index) {
-      if (confirm("Remover esta atividade?")) {
+      if (confirm("Excluir?")) {
         atividades.splice(index, 1);
         salvarAlteracoes();
         renderAtividades();
