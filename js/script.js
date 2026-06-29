@@ -63,7 +63,7 @@ async function gerarRoteiroIA(e) {
                     Responda apenas com um JSON válido contendo: titulo, destino, descricao, dataInicio, dataFim.`;
 
     const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=SUA_CHAVE_GEMINI_AQUI",
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + process.env.SUA_CHAVE_AQUI,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
