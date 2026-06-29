@@ -1,244 +1,181 @@
 <!doctype html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RoadMap - Detalhes do Roteiro</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RoadMap - Detalhes do Roteiro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+    body { font-family: "Inter", sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%); }
+    .fade-in { animation: fadeIn 0.5s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
 
-Online
-roteiro_corrigido.html
-<!doctype html>
-<html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RoadMap - Detalhes do Roteiro</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-      rel="stylesheet"
-    />
-    <style>
-      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
-      body {
-        font-family: "Inter", sans-serif;
-      }
-      .gradient-bg {
-        background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
-      }
-      .fade-in {
-        animation: fadeIn 0.5s ease-out;
-      }
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(10px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-    </style>
-  </head>
-  <body class="bg-gray-50 min-h-screen">
-    <header class="gradient-bg text-white shadow-lg">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div class="flex justify-between items-center">
-          <a
-            href="dashboard.html"
-            class="flex items-center gap-3 hover:opacity-80 transition"
-          >
-            <i class="fa-solid fa-map text-3xl"></i>
-            <h1 class="text-2xl font-bold">RoadMap</h1>
-          </a>
-          <button
-            onclick="window.location.href = 'dashboard.html'"
-            class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl transition flex items-center gap-2 text-sm"
-          >
-            <i class="fa-solid fa-arrow-left"></i> Voltar ao Dashboard
+  <header class="gradient-bg text-white shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 py-6">
+      <div class="flex justify-between items-center">
+        <a href="dashboard.html" class="flex items-center gap-3 hover:opacity-80">
+          <i class="fa-solid fa-map text-3xl"></i>
+          <h1 class="text-2xl font-bold">RoadMap</h1>
+        </a>
+        <button onclick="window.location.href = 'dashboard.html'" 
+                class="bg-white/20 hover:bg-white/30 px-5 py-2 rounded-xl flex items-center gap-2">
+          <i class="fa-solid fa-arrow-left"></i> Voltar ao Dashboard
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 py-12">
+    <div id="roteiro-content" class="fade-in hidden">
+      <!-- Cabeçalho -->
+      <div class="bg-white rounded-t-[3rem] p-8 sm:p-12 shadow-sm border-x border-t border-gray-100">
+        <div id="tipo-badge" class="mb-6"></div>
+        <h2 id="det-titulo" class="text-4xl font-bold text-gray-900"></h2>
+        <div class="flex flex-wrap gap-6 mt-6 text-gray-600">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-location-dot text-teal-600"></i>
+            <span id="det-destino"></span>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-calendar-alt text-teal-600"></i>
+            <span id="det-datas"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conteúdo Gerado -->
+      <div class="bg-white p-8 sm:p-12 border-x border-gray-100">
+        <div class="flex justify-between items-center mb-8">
+          <h3 class="text-2xl font-bold">Roteiro Completo</h3>
+          <button onclick="gerarConteudoIA()" 
+                  class="bg-teal-600 text-white px-6 py-3 rounded-2xl flex items-center gap-2 hover:bg-teal-700 transition">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Gerar com IA
+          </button>
+        </div>
+
+        <div id="ia-loading" class="hidden text-center py-16">
+          <i class="fa-solid fa-spinner fa-spin text-5xl text-teal-600 mb-4"></i>
+          <p class="text-gray-600">Gerando roteiro, atividades e checklist...</p>
+        </div>
+
+        <div id="conteudo-ia" class="space-y-10"></div>
+      </div>
+
+      <!-- Rodapé -->
+      <div class="bg-gray-50 p-8 rounded-b-[3rem] border border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-6">
+        <div class="text-sm text-gray-500">
+          <i class="fa-solid fa-clock mr-1"></i> Criado via RoadMap
+        </div>
+        <div class="flex gap-4">
+          <button onclick="window.print()" class="bg-white border px-6 py-3 rounded-2xl hover:bg-gray-100">
+            <i class="fa-solid fa-print"></i> Imprimir
+          </button>
+          <button onclick="compartilhar()" class="gradient-bg text-white px-6 py-3 rounded-2xl">
+            <i class="fa-solid fa-share-nodes"></i> Compartilhar
           </button>
         </div>
       </div>
-    </header>
+    </div>
 
-    <main class="max-w-4xl mx-auto px-4 py-12">
-      <div id="roteiro-content" class="fade-in hidden">
-        <div
-          class="bg-white rounded-t-[3rem] p-8 sm:p-12 shadow-sm border-x border-t border-gray-100"
-        >
-          <div id="tipo-badge" class="mb-6"></div>
-          <h2
-            id="det-titulo"
-            class="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-4 leading-tight"
-          >
-            Título do Roteiro
-          </h2>
-          <div class="flex flex-wrap items-center gap-6 text-gray-600">
-            <div class="flex items-center gap-2">
-              <i class="fa-solid fa-location-dot text-teal-600 text-xl"></i>
-              <span id="det-destino" class="font-semibold text-lg"
-                >Destino</span
-              >
-            </div>
-            <div class="flex items-center gap-2">
-              <i class="fa-solid fa-calendar-alt text-teal-600 text-xl"></i>
-              <span id="det-datas" class="font-medium"
-                >01/01/2026 - 07/01/2026</span
-              >
-            </div>
-          </div>
-        </div>
+    <div id="error-state" class="hidden text-center py-20">
+      <i class="fa-solid fa-triangle-exclamation text-6xl text-red-500 mb-6"></i>
+      <h3 class="text-2xl font-bold">Roteiro não encontrado</h3>
+    </div>
+  </main>
 
-        <div class="bg-white p-8 sm:p-12 border-x border-gray-100">
-          <h3
-            class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-3"
-          >
-            <i class="fa-solid fa-circle-info text-teal-600"></i>
-            Sobre esta viagem
-          </h3>
-          <p
-            id="det-descricao"
-            class="text-gray-600 text-lg leading-relaxed mb-10"
-          >
-            Carregando descrição detalhada...
-          </p>
+  <script>
+    let roteiroAtual = null;
 
-          <div class="grid sm:grid-cols-2 gap-8">
-            <div class="bg-teal-50 p-6 rounded-3xl border border-teal-100">
-              <h4 class="font-bold text-teal-900 mb-2 flex items-center gap-2">
-                <i class="fa-solid fa-umbrella-beach"></i> Clima Sugerido
-              </h4>
-              <p id="det-clima" class="text-teal-700">
-                Baseado na sua escolha de estação.
-              </p>
-            </div>
-            <div class="bg-teal-50 p-6 rounded-3xl border border-teal-100">
-              <h4 class="font-bold text-teal-900 mb-2 flex items-center gap-2">
-                <i class="fa-solid fa-suitcase"></i> Status do Plano
-              </h4>
-              <p class="text-teal-700">Roteiro pronto para ser seguido.</p>
-            </div>
-          </div>
-        </div>
+    window.addEventListener("DOMContentLoaded", () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const id = parseInt(urlParams.get("id"));
 
-        <div
-          class="bg-gray-50 p-8 rounded-b-[3rem] border border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-6"
-        >
-          <div class="text-sm text-gray-500">
-            <i class="fa-solid fa-clock mr-1"></i> Criado via RoadMap
-            Intelligence
-          </div>
-          <div class="flex gap-4 w-full sm:w-auto">
-            <button
-              onclick="window.print()"
-              class="flex-1 sm:flex-none bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-2xl font-bold hover:bg-gray-100 transition flex items-center justify-center gap-2"
-            >
-              <i class="fa-solid fa-print"></i> Imprimir
-            </button>
-            <button
-              onclick="compartilhar()"
-              class="flex-1 sm:flex-none gradient-bg text-white px-6 py-3 rounded-2xl font-bold hover:opacity-90 transition shadow-lg flex items-center justify-center gap-2"
-            >
-              <i class="fa-solid fa-share-nodes"></i> Compartilhar
-            </button>
-          </div>
-        </div>
-      </div>
+      if (!id) return mostrarErro();
 
-      <div id="error-state" class="hidden text-center py-20">
-        <i
-          class="fa-solid fa-triangle-exclamation text-6xl text-red-500 mb-6"
-        ></i>
-        <h3 class="text-2xl font-bold text-gray-800 mb-2">
-          Roteiro não encontrado
-        </h3>
-        <p class="text-gray-600 mb-8">
-          O roteiro que você está procurando não existe ou foi removido.
-        </p>
-        <a
-          href="dashboard.html"
-          class="gradient-bg text-white px-8 py-3 rounded-2xl font-bold"
-          >Voltar ao Dashboard</a
-        >
-      </div>
-    </main>
+      const roteiros = JSON.parse(localStorage.getItem("roadmap_roteiros") || "[]");
+      roteiroAtual = roteiros.find(r => r.id === id);
 
-    <script>
-      window.addEventListener("DOMContentLoaded", () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const id = parseInt(urlParams.get("id"));
+      if (roteiroAtual) {
+        renderizarBasico();
+      } else {
+        mostrarErro();
+      }
+    });
 
-        if (!id) {
-          mostrarErro();
-          return;
-        }
+    function renderizarBasico() {
+      document.getElementById("roteiro-content").classList.remove("hidden");
+      
+      document.getElementById("det-titulo").textContent = roteiroAtual.titulo;
+      document.getElementById("det-destino").textContent = roteiroAtual.destino;
+      document.getElementById("det-datas").textContent = 
+        `${new Date(roteiroAtual.dataInicio).toLocaleDateString('pt-BR')} — ${new Date(roteiroAtual.dataFim).toLocaleDateString('pt-BR')}`;
 
-        const roteiros = JSON.parse(
-          localStorage.getItem("roadmap_roteiros") || "[]",
+      const badge = document.getElementById("tipo-badge");
+      badge.innerHTML = roteiroAtual.tipo === "smart" 
+        ? `<span class="bg-teal-600 text-white px-4 py-1.5 rounded-full text-xs font-bold">🤖 IA</span>`
+        : `<span class="bg-gray-200 text-gray-700 px-4 py-1.5 rounded-full text-xs font-bold">Manual</span>`;
+    }
+
+    async function gerarConteudoIA() {
+      if (!roteiroAtual) return;
+
+      const loading = document.getElementById("ia-loading");
+      const container = document.getElementById("conteudo-ia");
+      loading.classList.remove("hidden");
+      container.innerHTML = "";
+
+      try {
+        const prompt = `Crie um roteiro de viagem completo em português para:
+
+Destino: ${roteiroAtual.destino}
+Período: ${roteiroAtual.dataInicio} até ${roteiroAtual.dataFim}
+Estação: ${roteiroAtual.estacao || "não informada"}
+
+Inclua:
+1. Resumo da viagem
+2. Itinerário dia a dia com sugestões de atividades (inclua data e hora aproximada)
+3. Checklist de bagagem personalizado (roupas, itens essenciais, adaptado ao clima e estação)
+
+Use formatação clara com Markdown.`;
+
+        const response = await fetch(
+          "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=SUA_CHAVE_GEMINI_AQUI",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+          }
         );
-        const roteiro = roteiros.find((r) => r.id === id);
 
-        if (roteiro) {
-          renderizarRoteiro(roteiro);
-        } else {
-          mostrarErro();
-        }
-      });
+        const data = await response.json();
+        const texto = data.candidates[0].content.parts[0].text;
 
-      function renderizarRoteiro(r) {
-        document.getElementById("roteiro-content").classList.remove("hidden");
-
-        document.getElementById("det-titulo").textContent = r.titulo;
-        document.getElementById("det-destino").textContent = r.destino;
-        document.getElementById("det-descricao").textContent = r.descricao;
-        document.getElementById("det-datas").textContent =
-          `${formatarData(r.dataInicio)} — ${formatarData(r.dataFim)}`;
-
-        const badge = document.getElementById("tipo-badge");
-        if (r.tipo === "smart") {
-          badge.innerHTML = `
-          <span class="inline-flex items-center gap-2 bg-teal-600 text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
-            <i class="fa-solid fa-robot"></i> Gerado por Inteligência
-          </span>
+        container.innerHTML = `
+          <div class="bg-gray-50 p-8 rounded-3xl border leading-relaxed">
+            ${texto.replace(/\n/g, '<br><br>')}
+          </div>
         `;
-          document.getElementById("det-clima").textContent =
-            `Ideal para o ${r.estacao} no continente ${r.continente}.`;
-        } else {
-          badge.innerHTML = `
-          <span class="inline-flex items-center gap-2 bg-gray-200 text-gray-700 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
-            <i class="fa-solid fa-pen"></i> Planejamento Manual
-          </span>
-        `;
-          document.getElementById("det-clima").textContent =
-            "Planejado conforme suas preferências manuais.";
-        }
-      }
 
-      function formatarData(d) {
-        return new Date(d).toLocaleDateString("pt-BR");
+      } catch (error) {
+        container.innerHTML = `<p class="text-red-600 bg-red-50 p-6 rounded-3xl">Erro ao gerar conteúdo. Verifique sua chave da API Gemini.</p>`;
+      } finally {
+        loading.classList.add("hidden");
       }
+    }
 
-      function mostrarErro() {
-        document.getElementById("error-state").classList.remove("hidden");
-      }
+    function mostrarErro() {
+      document.getElementById("error-state").classList.remove("hidden");
+    }
 
-      function compartilhar() {
-        if (navigator.share) {
-          navigator
-            .share({
-              title: document.getElementById("det-titulo").textContent,
-              text: "Olha o roteiro que eu criei no RoadMap!",
-              url: window.location.href,
-            })
-            .catch(console.error);
-        } else {
-          alert("Copiado para a área de transferência!");
-        }
-      }
-    </script>
-  </body>
+    function compartilhar() {
+      alert("Link copiado! (funcionalidade simulada)");
+    }
+  </script>
+</body>
 </html>

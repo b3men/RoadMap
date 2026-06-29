@@ -8,65 +8,123 @@ function init() {
       destino: "Budapeste → Viena → Praga → St. Moritz → Milão",
       dataInicio: "2026-05-02",
       dataFim: "2026-05-16",
-      status: "Planejado",
-      atividades: ["Chegada em Budapeste", "Passeio Danúbio", "Bernina Express"],
-      documentos: []
+      tipo: "smart",
+      continente: "Europa",
+      estacao: "Primavera",
+      descricao: "Viagem incrível pela Europa Central gerada por IA",
+      atividades: ["Chegada em Budapeste", "Passeio pelo Danúbio", "Bernina Express"]
     }];
     localStorage.setItem('roadmap_roteiros', JSON.stringify(roteiros));
   }
 }
 
-function fazerLogin() {
-  window.location.href = 'dashboard.html';
-}
-
 function renderRoteiros() {
-  const container = document.getElementById('roteiros-list');
+  const container = document.getElementById('roteiros-list') || document.getElementById('roteiros-container');
   if (!container) return;
 
-  container.innerHTML = '';
-
-  roteiros.forEach(roteiro => {
-    const cardHTML = `
-      <div class="bg-white rounded-3xl shadow-lg p-6 card cursor-pointer" onclick="verRoteiro(${roteiro.id})">
-        <div class="flex justify-between">
-          <h3 class="font-semibold text-xl">${roteiro.titulo}</h3>
-          <span class="text-xs px-3 py-1 bg-teal-100 text-teal-700 rounded-full">${roteiro.status}</span>
-        </div>
-        <p class="text-teal-600 mt-2">${roteiro.destino}</p>
-        <p class="text-sm text-gray-500 mt-4">${roteiro.dataInicio} até ${roteiro.dataFim}</p>
-        
-        <div class="mt-6 pt-6 border-t flex gap-2">
-          <button onclick="event.stopImmediatePropagation(); verRoteiro(${roteiro.id});" 
-                  class="flex-1 bg-teal-600 text-white py-3 rounded-2xl text-sm font-medium">
-            Ver Detalhes
-          </button>
-        </div>
+  container.innerHTML = roteiros.map(roteiro => `
+    <div class="bg-white rounded-3xl shadow-lg p-6 cursor-pointer hover:shadow-xl transition" onclick="verRoteiro(${roteiro.id})">
+      <div class="flex justify-between items-start">
+        <h3 class="font-semibold text-xl">${roteiro.titulo}</h3>
+        <span class="text-xs px-3 py-1 bg-teal-100 text-teal-700 rounded-full">${roteiro.tipo === 'smart' ? '🤖 IA' : 'Manual'}</span>
       </div>
-    `;
-    container.innerHTML += cardHTML;
-  });
+      <p class="text-teal-600 mt-2">${roteiro.destino}</p>
+      <p class="text-sm text-gray-500 mt-4">${roteiro.dataInicio} até ${roteiro.dataFim}</p>
+      
+      <div class="mt-6 pt-6 border-t">
+        <button onclick="event.stopImmediatePropagation(); verRoteiro(${roteiro.id});" 
+                class="w-full bg-teal-600 text-white py-3 rounded-2xl text-sm font-medium">
+          Ver Detalhes
+        </button>
+      </div>
+    </div>
+  `).join('');
 }
 
-function novaViagem() {
-  const titulo = prompt("Nome do novo roteiro:");
-  if (!titulo) return;
+async function gerarRoteiroIA(e) {
+  e.preventDefault();
+
+  const continente = document.getElementById('smart-continente').value;
+  const estacao = document.getElementById('smart-estacao').value;
+  const nomeCustom = document.getElementById('smart-nome') ? document.getElementById('smart-nome').value.trim() : '';
+
+  if (!continente || !estacao) {
+    alert("Por favor, selecione Continente e Estação.");
+    return;
+  }
+
+  const btn = e.target.querySelector('button');
+  btn.disabled = true;
+  btn.innerHTML = 'Gerando com IA...';
+
+  try {
+    const prompt = `Crie um roteiro de viagem para ${continente} na estação de ${estacao}.
+                    ${nomeCustom ? `Título: ${nomeCustom}` : ''}
+                    Responda apenas com um JSON válido contendo: titulo, destino, descricao, dataInicio, dataFim.`;
+
+    const response = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=SUA_CHAVE_GEMINI_AQUI",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }]
+        })
+      }
+    );
+
+    const data = await response.json();
+    const texto = data.candidates[0].content.parts[0].text;
+
+    const jsonMatch = texto.match(/\{[\s\S]*\}/);
+    const gerado = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
+
+    const novoRoteiro = {
+      id: Date.now(),
+      titulo: gerado?.titulo || nomeCustom || `Viagem para ${continente}`,
+      destino: gerado?.destino || `${continente}`,
+      descricao: gerado?.descricao || `Roteiro gerado para ${estacao} em ${continente}`,
+      dataInicio: gerado?.dataInicio || "2026-06-01",
+      dataFim: gerado?.dataFim || "2026-06-10",
+      tipo: "smart",
+      continente: continente,
+      estacao: estacao,
+      atividades: []
+    };
+
+    roteiros.push(novoRoteiro);
+    localStorage.setItem('roadmap_roteiros', JSON.stringify(roteiros));
+
+    alert("✅ Roteiro gerado com sucesso!");
+    document.getElementById('new-roteiro-modal').classList.add('hidden');
+    renderRoteiros();
+
+  } catch (error) {
+    console.error(error);
+    alert("❌ Erro ao conectar com a IA. Verifique sua chave do Gemini.");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Gerar Roteiro com IA';
+  }
+}
+
+function criarRoteiroManual(e) {
+  e.preventDefault();
 
   const novo = {
     id: Date.now(),
-    titulo: titulo,
-    destino: prompt("Destino principal (ex: Paris, Itália):") || "Destino a definir",
-    dataInicio: "2026-06-01",
-    dataFim: "2026-06-10",
-    status: "Planejado",
-    atividades: [],
-    documentos: []
+    titulo: document.getElementById('man-titulo').value,
+    destino: document.getElementById('man-destino').value,
+    dataInicio: document.getElementById('man-inicio').value,
+    dataFim: document.getElementById('man-fim').value,
+    tipo: "manual",
+    atividades: []
   };
 
   roteiros.push(novo);
   localStorage.setItem('roadmap_roteiros', JSON.stringify(roteiros));
   renderRoteiros();
-  alert("Roteiro criado com sucesso!");
+  document.getElementById('new-roteiro-modal').classList.add('hidden');
 }
 
 function verRoteiro(id) {
@@ -74,49 +132,6 @@ function verRoteiro(id) {
   window.location.href = 'roteiro.html';
 }
 
-function carregarRoteiroAtual() {
-  const id = parseInt(localStorage.getItem('roteiroAtual'));
-  const roteiro = roteiros.find(r => r.id === id);
-  const container = document.getElementById('roteiro-content');
-  
-  if (!roteiro || !container) return;
-
-  container.innerHTML = `
-    <div class="bg-white rounded-3xl shadow-xl p-10">
-        <h1 class="text-4xl font-bold text-gray-800">${roteiro.titulo}</h1>
-        <p class="text-2xl text-teal-600 mt-2">${roteiro.destino}</p>
-        <p class="text-gray-500 mt-1">${roteiro.dataInicio} — ${roteiro.dataFim}</p>
-
-        <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-10">
-            <div>
-            <h3 class="text-xl font-semibold mb-6 flex items-center gap-2">
-                <i class="fa-solid fa-list-check"></i> Atividades
-            </h3>
-            <ul class="space-y-3">
-                ${roteiro.atividades.map(at => `<li class="flex items-center gap-3 bg-gray-50 p-4 rounded-2xl"><i class="fa-solid fa-circle-check text-teal-500"></i> ${at}</li>`).join('')}
-            </ul>
-            </div>
-
-            <div>
-            <h3 class="text-xl font-semibold mb-6 flex items-center gap-2">
-                <i class="fa-solid fa-folder-open"></i> Documentos
-            </h3>
-            <p class="text-gray-500">Nenhum documento anexado ainda.</p>
-            <button onclick="alert('Funcionalidade de upload em desenvolvimento')" 
-                    class="mt-4 text-teal-600 hover:underline">+ Adicionar Documento</button>
-            </div>
-        </div>
-
-        <div class="mt-12 pt-8 border-t">
-            <button onclick="window.location.href='dashboard.html'" 
-                    class="bg-gray-200 hover:bg-gray-300 px-8 py-4 rounded-2xl font-medium">Voltar para Dashboard
-            </button>
-        </div>
-    </div>
-  `;
-}
-
-// Inicialização
 init();
 
 if (window.location.pathname.includes('dashboard.html')) {
