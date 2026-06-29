@@ -37,7 +37,7 @@
     <div id="roteiros-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
   </main>
 
-  <!-- Modal Novo Roteiro -->
+  <!-- Modal -->
   <div id="new-roteiro-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
     <div class="bg-white rounded-3xl p-8 w-full max-w-lg">
       <h3 class="text-2xl font-bold mb-6">Criar Novo Roteiro</h3>
@@ -47,20 +47,24 @@
         <button onclick="switchTab('manual')" id="tab-manual" class="flex-1 py-3 font-medium text-gray-500">Manual</button>
       </div>
 
-      <!-- Sugestões (Seleção Rápida) -->
+      <!-- Sugerido -->
       <form id="form-sugerido" onsubmit="criarRoteiroSugerido(event)">
         <div class="space-y-5">
           <div>
-            <label class="block text-sm mb-2">Escolha um Destino Sugerido</label>
+            <label class="block text-sm mb-2">Escolha um Destino</label>
             <select id="sugerido-opcao" required class="w-full p-4 border border-gray-300 rounded-2xl">
-              <option value="">Selecione uma opção...</option>
-              <option value="Europa-Verão">Europa - Verão (Paris, Itália, Espanha)</option>
-              <option value="América do Sul-Verão">América do Sul - Verão (Rio, Nordeste)</option>
-              <option value="Ásia-Primavera">Ásia - Primavera (Japão Sakura)</option>
-              <option value="África-Primavera">África - Primavera (Quênia Safári)</option>
-              <option value="América do Norte-Outono">América do Norte - Outono (Canadá)</option>
-              <option value="Oceania-Verão">Oceania - Verão (Austrália)</option>
+              <option value="">Selecione...</option>
+              <option value="Europa">Europa (Paris, Itália, Espanha)</option>
+              <option value="América do Sul">América do Sul (Rio, Nordeste)</option>
+              <option value="Ásia">Ásia (Japão, Tailândia)</option>
+              <option value="África">África (Quênia, Marrocos)</option>
+              <option value="América do Norte">América do Norte (Canadá, EUA)</option>
+              <option value="Oceania">Oceania (Austrália)</option>
             </select>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <input id="sugerido-inicio" type="date" required class="w-full p-4 border border-gray-300 rounded-2xl">
+            <input id="sugerido-fim" type="date" required class="w-full p-4 border border-gray-300 rounded-2xl">
           </div>
           <button type="submit" class="w-full gradient-bg text-white py-4 rounded-2xl font-bold">Criar Roteiro Sugerido</button>
         </div>
@@ -68,8 +72,8 @@
 
       <!-- Manual -->
       <form id="form-manual" onsubmit="criarRoteiroManual(event)" class="hidden space-y-5">
-        <input id="man-titulo" type="text" placeholder="Título do Roteiro" required class="w-full p-4 border border-gray-300 rounded-2xl">
-        <input id="man-destino" type="text" placeholder="Destino (ex: Paris, França)" required class="w-full p-4 border border-gray-300 rounded-2xl">
+        <input id="man-titulo" placeholder="Título do Roteiro" required class="w-full p-4 border border-gray-300 rounded-2xl">
+        <input id="man-destino" placeholder="Destino" required class="w-full p-4 border border-gray-300 rounded-2xl">
         <div class="grid grid-cols-2 gap-4">
           <input id="man-inicio" type="date" required class="w-full p-4 border border-gray-300 rounded-2xl">
           <input id="man-fim" type="date" required class="w-full p-4 border border-gray-300 rounded-2xl">
@@ -124,17 +128,20 @@
     function criarRoteiroSugerido(e) {
       e.preventDefault();
       const opcao = document.getElementById("sugerido-opcao").value;
-      if (!opcao) return;
+      const dataInicio = document.getElementById("sugerido-inicio").value;
+      const dataFim = document.getElementById("sugerido-fim").value;
 
-      let titulo = "Viagem para " + opcao.split('-')[0];
-      let destino = opcao.split('-')[0];
+      if (!opcao || !dataInicio || !dataFim) {
+        alert("Preencha todos os campos!");
+        return;
+      }
 
       const novo = {
         id: Date.now(),
-        titulo: titulo,
-        destino: destino,
-        dataInicio: "2026-06-01",
-        dataFim: "2026-06-10",
+        titulo: opcao + " - Viagem",
+        destino: opcao,
+        dataInicio: dataInicio,
+        dataFim: dataFim,
         tipo: "manual",
         atividades: []
       };
@@ -157,7 +164,6 @@
         tipo: "manual",
         atividades: []
       };
-
       roteiros.push(novo);
       salvarRoteiros();
       renderDashboard();

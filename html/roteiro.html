@@ -51,10 +51,6 @@
       <!-- Ações -->
       <div class="bg-white p-8 sm:p-12 border-x border-gray-100">
         <div class="flex gap-4 mb-8">
-          <button onclick="mostrarChecklist()" 
-                  class="flex-1 bg-amber-500 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-amber-600">
-            <i class="fa-solid fa-suitcase"></i> Checklist de Mala
-          </button>
           <button onclick="adicionarAtividade()" 
                   class="flex-1 bg-teal-600 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-teal-700">
             <i class="fa-solid fa-plus"></i> Nova Atividade
@@ -107,52 +103,17 @@
         : `<span class="bg-gray-200 text-gray-700 px-4 py-1.5 rounded-full text-xs font-bold">Manual</span>`;
     }
 
-    // ==================== CHECKLIST DE MALA ====================
-    function mostrarChecklist() {
-      let checklistHTML = `<h4 class="font-bold text-lg mb-4">Checklist de Bagagem</h4>`;
-
-      if (roteiroAtual.estacao === "Verão") {
-        checklistHTML += `
-          <ul class="space-y-3 text-gray-700">
-            <li>✅ Roupas leves e shorts</li>
-            <li>✅ Protetor solar e óculos de sol</li>
-            <li>✅ Chinelo / Sandália</li>
-            <li>✅ Roupa de banho</li>
-            <li>✅ Garrafa de água reutilizável</li>
-          </ul>`;
-      } else if (roteiroAtual.estacao === "Inverno") {
-        checklistHTML += `
-          <ul class="space-y-3 text-gray-700">
-            <li>✅ Casaco pesado / Jaqueta</li>
-            <li>✅ Botas ou tênis impermeável</li>
-            <li>✅ Luvas, cachecol e gorro</li>
-            <li>✅ Roupas térmicas</li>
-            <li>✅ Medicamentos para frio</li>
-          </ul>`;
-      } else {
-        checklistHTML += `
-          <ul class="space-y-3 text-gray-700">
-            <li>✅ Roupas versáteis (camadas)</li>
-            <li>✅ Jaqueta leve impermeável</li>
-            <li>✅ Tênis confortável</li>
-            <li>✅ Adaptador de tomada</li>
-            <li>✅ Documentos e passaporte</li>
-          </ul>`;
-      }
-
-      document.getElementById("lista-atividades").innerHTML = checklistHTML;
-    }
-
-    // ==================== ATIVIDADES MANUAL ====================
     function adicionarAtividade() {
-      const data = prompt("Data (ex: 2026-06-05):");
+      const data = prompt("Data da atividade (ex: 2026-06-05):");
       if (!data) return;
+
       const hora = prompt("Hora (ex: 14:30):");
       if (!hora) return;
-      const local = prompt("Descrição / Local:");
-      if (!local) return;
 
-      atividades.push({ data, hora, local });
+      const descricao = prompt("Descrição da atividade / Local:");
+      if (!descricao) return;
+
+      atividades.push({ data, hora, descricao });
       salvarAlteracoes();
       renderAtividades();
     }
@@ -160,16 +121,17 @@
     function renderAtividades() {
       const container = document.getElementById("lista-atividades");
       if (atividades.length === 0) {
-        container.innerHTML = `<p class="text-gray-500 py-8 text-center">Nenhuma atividade adicionada.</p>`;
+        container.innerHTML = `<p class="text-gray-500 py-8 text-center">Nenhuma atividade adicionada ainda.</p>`;
         return;
       }
+
       container.innerHTML = atividades.map((at, i) => `
-        <div class="bg-gray-50 p-5 rounded-3xl border flex justify-between">
+        <div class="bg-gray-50 p-5 rounded-3xl border flex justify-between items-center">
           <div>
-            <p class="font-medium">${at.local}</p>
+            <p class="font-medium">${at.descricao}</p>
             <p class="text-sm text-teal-600">${at.data} • ${at.hora}</p>
           </div>
-          <button onclick="removerAtividade(${i})" class="text-red-500">
+          <button onclick="removerAtividade(${i})" class="text-red-500 hover:text-red-700">
             <i class="fa-solid fa-trash"></i>
           </button>
         </div>
@@ -177,7 +139,7 @@
     }
 
     function removerAtividade(index) {
-      if (confirm("Excluir?")) {
+      if (confirm("Remover esta atividade?")) {
         atividades.splice(index, 1);
         salvarAlteracoes();
         renderAtividades();
