@@ -32,7 +32,6 @@
 
   <main class="max-w-5xl mx-auto px-4 py-12">
     <div id="roteiro-content" class="fade-in hidden">
-      <!-- Cabeçalho -->
       <div class="bg-white rounded-t-[3rem] p-8 sm:p-12 shadow-sm border-x border-t border-gray-100">
         <div id="tipo-badge" class="mb-6"></div>
         <h2 id="det-titulo" class="text-4xl font-bold text-gray-900"></h2>
@@ -48,12 +47,13 @@
         </div>
       </div>
 
-      <!-- Ações -->
       <div class="bg-white p-8 sm:p-12 border-x border-gray-100">
         <div class="flex gap-4 mb-8">
-          <button onclick="adicionarAtividade()" 
-                  class="flex-1 bg-teal-600 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-teal-700">
+          <button onclick="adicionarAtividade()" class="flex-1 bg-teal-600 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-teal-700">
             <i class="fa-solid fa-plus"></i> Nova Atividade
+          </button>
+          <button onclick="mostrarChecklist()" class="flex-1 bg-amber-500 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-amber-600">
+            <i class="fa-solid fa-suitcase"></i> Checklist de Mala
           </button>
         </div>
 
@@ -99,18 +99,16 @@
 
       const badge = document.getElementById("tipo-badge");
       badge.innerHTML = roteiroAtual.tipo === "smart" 
-        ? `<span class="bg-teal-600 text-white px-4 py-1.5 rounded-full text-xs font-bold">🤖 IA</span>`
+        ? `<span class="bg-teal-600 text-white px-4 py-1.5 rounded-full text-xs font-bold">IA</span>`
         : `<span class="bg-gray-200 text-gray-700 px-4 py-1.5 rounded-full text-xs font-bold">Manual</span>`;
     }
 
     function adicionarAtividade() {
-      const data = prompt("Data da atividade (ex: 2026-06-05):");
+      const data = prompt("Data (ex: 2026-06-05):");
       if (!data) return;
-
       const hora = prompt("Hora (ex: 14:30):");
       if (!hora) return;
-
-      const descricao = prompt("Descrição da atividade / Local:");
+      const descricao = prompt("Descrição / Local:");
       if (!descricao) return;
 
       atividades.push({ data, hora, descricao });
@@ -120,26 +118,33 @@
 
     function renderAtividades() {
       const container = document.getElementById("lista-atividades");
-      if (atividades.length === 0) {
+      
+      if (!atividades || atividades.length === 0) {
         container.innerHTML = `<p class="text-gray-500 py-8 text-center">Nenhuma atividade adicionada ainda.</p>`;
         return;
       }
 
-      container.innerHTML = atividades.map((at, i) => `
-        <div class="bg-gray-50 p-5 rounded-3xl border flex justify-between items-center">
-          <div>
-            <p class="font-medium">${at.descricao}</p>
-            <p class="text-sm text-teal-600">${at.data} • ${at.hora}</p>
+      container.innerHTML = atividades.map((at, i) => {
+        const descricao = at.descricao || at || 'Atividade sem descrição';
+        const data = at.data || '';
+        const hora = at.hora || '';
+        
+        return `
+          <div class="bg-gray-50 p-5 rounded-3xl border flex justify-between items-center">
+            <div>
+              <p class="font-medium">${descricao}</p>
+              <p class="text-sm text-teal-600">${data} ${hora ? '• ' + hora : ''}</p>
+            </div>
+            <button onclick="removerAtividade(${i})" class="text-red-500 hover:text-red-700">
+              <i class="fa-solid fa-trash"></i>
+            </button>
           </div>
-          <button onclick="removerAtividade(${i})" class="text-red-500 hover:text-red-700">
-            <i class="fa-solid fa-trash"></i>
-          </button>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     function removerAtividade(index) {
-      if (confirm("Remover esta atividade?")) {
+      if (confirm("Remover?")) {
         atividades.splice(index, 1);
         salvarAlteracoes();
         renderAtividades();
@@ -153,6 +158,60 @@
         roteiros[index].atividades = atividades;
         localStorage.setItem("roadmap_roteiros", JSON.stringify(roteiros));
       }
+    }
+
+    function mostrarChecklist() {
+      const estacao = (roteiroAtual.estacao || "Geral").toLowerCase();
+      let html = `<h4 class="font-bold text-lg mb-4">Checklist de Mala - ${roteiroAtual.estacao || "Geral"}</h4>`;
+
+      if (estacao.includes("verão")) {
+        html += `
+          <ul class="space-y-3 text-gray-700">
+            <li>✅ Roupas leves, shorts e camisetas</li>
+            <li>✅ Protetor solar, óculos e chapéu</li>
+            <li>✅ Roupa de banho e chinelo</li>
+            <li>✅ Garrafa de água reutilizável</li>
+            <li>✅ Repelente de insetos</li>
+          </ul>`;
+      } else if (estacao.includes("inverno")) {
+        html += `
+          <ul class="space-y-3 text-gray-700">
+            <li>✅ Casaco pesado / Jaqueta térmica</li>
+            <li>✅ Botas impermeáveis</li>
+            <li>✅ Luvas, cachecol e gorro</li>
+            <li>✅ Roupas térmicas</li>
+            <li>✅ Medicamentos para frio</li>
+          </ul>`;
+      } else if (estacao.includes("primavera")) {
+        html += `
+          <ul class="space-y-3 text-gray-700">
+            <li>✅ Roupas em camadas</li>
+            <li>✅ Jaqueta leve impermeável</li>
+            <li>✅ Tênis confortável</li>
+            <li>✅ Protetor solar</li>
+            <li>✅ Guarda-chuva pequeno</li>
+          </ul>`;
+      } else if (estacao.includes("outono")) {
+        html += `
+          <ul class="space-y-3 text-gray-700">
+            <li>✅ Roupas em camadas</li>
+            <li>✅ Jaqueta leve</li>
+            <li>✅ Botas ou tênis confortável</li>
+            <li>✅ Lenço ou cachecol</li>
+            <li>✅ Guarda-chuva</li>
+          </ul>`;
+      } else {
+        html += `
+          <ul class="space-y-3 text-gray-700">
+            <li>✅ Roupas versáteis</li>
+            <li>✅ Jaqueta leve</li>
+            <li>✅ Tênis confortável</li>
+            <li>✅ Adaptador de tomada</li>
+            <li>✅ Documentos e carregadores</li>
+          </ul>`;
+      }
+
+      document.getElementById("lista-atividades").innerHTML = html;
     }
 
     function mostrarErro() {

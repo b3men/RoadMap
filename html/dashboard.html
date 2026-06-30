@@ -51,15 +51,15 @@
       <form id="form-sugerido" onsubmit="criarRoteiroSugerido(event)">
         <div class="space-y-5">
           <div>
-            <label class="block text-sm mb-2">Escolha um Destino</label>
+            <label class="block text-sm mb-2">Escolha um Destino Sugerido</label>
             <select id="sugerido-opcao" required class="w-full p-4 border border-gray-300 rounded-2xl">
               <option value="">Selecione...</option>
-              <option value="Europa">Europa (Paris, Itália, Espanha)</option>
-              <option value="América do Sul">América do Sul (Rio, Nordeste)</option>
-              <option value="Ásia">Ásia (Japão, Tailândia)</option>
-              <option value="África">África (Quênia, Marrocos)</option>
-              <option value="América do Norte">América do Norte (Canadá, EUA)</option>
-              <option value="Oceania">Oceania (Austrália)</option>
+              <option value="Europa-Primavera">Europa - Primavera (Paris, Itália, Espanha)</option>
+              <option value="América do Sul-Verão">América do Sul - Verão (Rio, Nordeste)</option>
+              <option value="Ásia-Primavera">Ásia - Primavera (Japão Sakura)</option>
+              <option value="África-Primavera">África - Primavera (Quênia Safári)</option>
+              <option value="América do Norte-Outono">América do Norte - Outono (Canadá)</option>
+              <option value="Oceania-Verão">Oceania - Verão (Austrália)</option>
             </select>
           </div>
           <div class="grid grid-cols-2 gap-4">
@@ -72,8 +72,8 @@
 
       <!-- Manual -->
       <form id="form-manual" onsubmit="criarRoteiroManual(event)" class="hidden space-y-5">
-        <input id="man-titulo" placeholder="Título do Roteiro" required class="w-full p-4 border border-gray-300 rounded-2xl">
-        <input id="man-destino" placeholder="Destino" required class="w-full p-4 border border-gray-300 rounded-2xl">
+        <input id="man-titulo" type="text" placeholder="Título do Roteiro" required class="w-full p-4 border border-gray-300 rounded-2xl">
+        <input id="man-destino" type="text" placeholder="Destino" required class="w-full p-4 border border-gray-300 rounded-2xl">
         <div class="grid grid-cols-2 gap-4">
           <input id="man-inicio" type="date" required class="w-full p-4 border border-gray-300 rounded-2xl">
           <input id="man-fim" type="date" required class="w-full p-4 border border-gray-300 rounded-2xl">
@@ -136,21 +136,46 @@
         return;
       }
 
+      const partes = opcao.split('-');
+      const continente = partes[0];
+      const estacao = partes[1] || "Primavera";
+
+      let titulo = `Viagem para ${continente}`;
+      let destino = continente;
+      let atividades = [];
+
+      // Itinerário básico por destino
+      if (opcao.includes("Europa")) {
+        atividades = ["Chegada em Paris", "Torre Eiffel ao pôr do sol", "Museu do Louvre", "Passeio de barco no Sena"];
+      } else if (opcao.includes("América do Sul")) {
+        atividades = ["Praia de Copacabana", "Cristo Redentor", "Passeio de buggy em Jericoacoara", "Dunas de Lençóis"];
+      } else if (opcao.includes("Ásia")) {
+        atividades = ["Templos de Quioto", "Hanami (cerejeiras)", "Mercado de Tóquio", "Castelo de Osaka"];
+      } else if (opcao.includes("África")) {
+        atividades = ["Safari no Maasai Mara", "Lago Nakuru com flamingos", "Reserva de Elefantes", "Cultura Maasai"];
+      } else if (opcao.includes("América do Norte")) {
+        atividades = ["Lake Louise", "Banff National Park", "Vancouver Downtown", "Columbia Icefield"];
+      } else if (opcao.includes("Oceania")) {
+        atividades = ["Opera House em Sydney", "Mergulho na Grande Barreira", "Floresta Tropical em Cairns", "Bondi Beach"];
+      }
+
       const novo = {
         id: Date.now(),
-        titulo: opcao + " - Viagem",
-        destino: opcao,
+        titulo: titulo,
+        destino: destino,
         dataInicio: dataInicio,
         dataFim: dataFim,
         tipo: "manual",
-        atividades: []
+        continente: continente,
+        estacao: estacao,
+        atividades: atividades  
       };
 
       roteiros.push(novo);
       salvarRoteiros();
       renderDashboard();
       document.getElementById("new-roteiro-modal").classList.add("hidden");
-      alert("Roteiro sugerido criado!");
+      alert("Roteiro sugerido criado com itinerário básico!");
     }
 
     function criarRoteiroManual(e) {
@@ -164,6 +189,7 @@
         tipo: "manual",
         atividades: []
       };
+
       roteiros.push(novo);
       salvarRoteiros();
       renderDashboard();
